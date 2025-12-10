@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>RK KNIT FAB — Admin Fabric Entry</title>
+
 <style>
   :root{
     --bg:#f8f8fb; --card:#fff; --border:#e5e7eb; --ink:#111; --muted:#777;
@@ -15,18 +16,19 @@
   .title{font-weight:700;font-size:22px}
   .container{max-width:900px;margin:0 auto;padding:20px}
   .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:20px;box-shadow:var(--shadow)}
-  .input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:15px}
-  .input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)}
-  .row{display:flex;gap:10px;align-items:center}
-  .wrap{flex-wrap:wrap}
+  .input,select,textarea{width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;font-size:15px}
   .btn{padding:10px 18px;border-radius:10px;border:0;background:var(--primary);color:#fff;font-size:15px;cursor:pointer}
   .btn-outline{background:#fff;color:var(--primary);border:1px solid var(--border)}
   .pill{background:#f1f1f4;padding:6px 10px;border-radius:999px;font-size:13px;border:1px solid var(--border)}
   .section-title{font-size:18px;font-weight:600;margin:10px 0}
-  @media(max-width:600px){ .row{flex-direction:column;align-items:flex-start} }
+  .row{display:flex;gap:10px}
+  .wrap{flex-wrap:wrap}
+  @media(max-width:600px){ .row{flex-direction:column} }
 </style>
+
 </head>
 <body>
+
 <header>
   <div class="title">RK KNIT FAB — Admin</div>
   <div style="font-size:13px;color:var(--muted)">Add / Edit / Delete Fabrics</div>
@@ -36,6 +38,7 @@
 
   <div class="card">
     <div class="section-title">Fabric Details</div>
+
     <div class="row">
       <div style="flex:1">
         <label>Name</label>
@@ -47,12 +50,8 @@
       </div>
     </div>
 
-    <div class="row">
-      <div style="flex:1">
-        <label>GSM</label>
-        <input id="gsm" type="number" class="input" />
-      </div>
-    </div>
+    <label>GSM</label>
+    <input id="gsm" type="number" class="input" />
 
     <label>Description</label>
     <textarea id="description" rows="3" class="input"></textarea>
@@ -73,7 +72,7 @@
 
     <div class="section-title">Media Upload</div>
     <input id="files" type="file" multiple accept="image/*,video/*" />
-    <div id="uploadStatus" style="font-size:13px;color:var(--muted);margin-top:6px"></div>
+    <div id="uploadStatus" style="font-size:13px;color:var(--muted);margin-top:5px"></div>
     <div id="mediaPreview" class="row wrap" style="margin-top:10px"></div>
 
     <div class="row" style="margin-top:16px">
@@ -84,83 +83,78 @@
 
   <div class="card">
     <div class="section-title">Existing Fabrics</div>
-    <input id="searchAdm" class="input" placeholder="Search fabric…" />
+    <input id="searchAdm" class="input" placeholder="Search fabric…” />
     <div id="table"></div>
   </div>
 
 </div>
 
 <script>
-// ===== CONFIG =====
-const API = "https://script.google.com/macros/s/AKfycbxtXSQZp9Ur6wMargr8eUi5oyw99y4jRDz4j7Sx2OBSmIMFxcRwvoVv9bZcYqDWbbn2/exec";
+// =================== CONFIG ===================
+const API = "https://lucky-man-4f8c.rkknitfabsachin.workers.dev";
+const AUTH_TOKEN = "Rk@2025";
 
-// ===== STATE =====
+// =================== STATE ===================
 let chars = [];
 let apps = [];
 let media = [];
 let editingId = null;
 
-const $ = q => document.querySelector(q);
+const $ = s => document.querySelector(s);
 
-// Add characteristic
-document.querySelector('#addChar').onclick = () => {
-  const v = document.querySelector('#charInput').value.trim();
-  if (v && !chars.includes(v)) {
-    chars.push(v);
-    renderTags();
-  }
-  document.querySelector('#charInput').value = "";
+// ================= CHARACTERISTICS =================
+document.querySelector("#addChar").onclick = () => {
+  const v = $("#charInput").value.trim();
+  if (v && !chars.includes(v)) chars.push(v);
+  $("#charInput").value = "";
+  render();
 };
 
-// Add application
-document.querySelector('#addApp').onclick = () => {
-  const v = document.querySelector('#appInput').value.trim();
-  if (v && !apps.includes(v)) {
-    apps.push(v);
-    renderTags();
-  }
-  document.querySelector('#appInput').value = "";
+// ================= APPLICATIONS =================
+document.querySelector("#addApp").onclick = () => {
+  const v = $("#appInput").value.trim();
+  if (v && !apps.includes(v)) apps.push(v);
+  $("#appInput").value = "";
+  render();
 };
 
-function renderTags(){
-  document.querySelector('#chars').innerHTML =
-    chars.map(c => `<span class='pill'>${c}</span>`).join('');
-
-  document.querySelector('#apps').innerHTML =
-    apps.map(a => `<span class='pill'>${a}</span>`).join('');
-
-  document.querySelector('#mediaPreview').innerHTML =
-    media.map(m => `<img src='${m}' style='width:100px;height:80px;object-fit:cover;border-radius:8px'/>`).join('');
+// ================= RENDER TAGS =================
+function render() {
+  $("#chars").innerHTML = chars.map(c => `<span class="pill">${c}</span>`).join("");
+  $("#apps").innerHTML = apps.map(a => `<span class="pill">${a}</span>`).join("");
+  $("#mediaPreview").innerHTML = media.map(m => `<img src="${m}" style="width:100px;height:80px;border-radius:8px;object-fit:cover" />`).join("");
 }
 
-// Upload files
-document.querySelector('#files').onchange = async () => {
-  const f = document.querySelector('#files').files;
+// ================= FILE UPLOAD =================
+document.querySelector("#files").onchange = async () => {
+  const f = $("#files").files;
   if (!f.length) return;
-
-  document.querySelector('#uploadStatus').textContent = "Uploading…";
+  $("#uploadStatus").textContent = "Uploading…";
 
   const fd = new FormData();
-  [...f].forEach(file => fd.append("file", file));
+  [...f].forEach(x => fd.append("file", x));
 
-  const r = await fetch(`${API}?fn=upload`, { method:"POST", body:fd });
+  const r = await fetch(`${API}?fn=upload`, {
+    method: "POST",
+    headers: { "Authorization": "Bearer " + AUTH_TOKEN },
+    body: fd
+  });
+
   const j = await r.json();
+  if (j.urls) media.push(...j.urls);
 
-  if (j.urls) media = [...media, ...j.urls];
-  renderTags();
-
-  document.querySelector('#uploadStatus').textContent = "";
+  $("#uploadStatus").textContent = "";
+  render();
 };
 
-// Save fabric
-document.querySelector('#saveBtn').onclick = async () => {
-
-  const payload = {
+// ================= SAVE FABRIC =================
+document.querySelector("#saveBtn").onclick = async () => {
+  const data = {
     id: editingId,
-    name: document.querySelector('#name').value.trim(),
-    category: document.querySelector('#category').value.trim(),
-    gsm: document.querySelector('#gsm').value.trim(),
-    description: document.querySelector('#description').value.trim(),
+    name: $("#name").value.trim(),
+    category: $("#category").value.trim(),
+    gsm: $("#gsm").value.trim(),
+    description: $("#description").value.trim(),
     characteristics: chars,
     applications: apps,
     media: media
@@ -168,74 +162,75 @@ document.querySelector('#saveBtn').onclick = async () => {
 
   await fetch(`${API}?fn=${editingId ? "update" : "create"}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + AUTH_TOKEN
+    },
+    body: JSON.stringify(data)
   });
 
   clearForm();
   load();
 };
 
-// Clear form
-document.querySelector('#clearBtn').onclick = clearForm;
-function clearForm(){
-  editingId=null;
-  document.querySelector('#name').value = "";
-  document.querySelector('#category').value = "";
-  document.querySelector('#gsm').value = "";
-  document.querySelector('#description').value = "";
+// ================= CLEAR FORM =================
+function clearForm() {
+  editingId = null;
+  $("#name").value = "";
+  $("#category").value = "";
+  $("#gsm").value = "";
+  $("#description").value = "";
   chars = [];
   apps = [];
   media = [];
-  renderTags();
+  render();
 }
 
-// Load table
-async function load(){
+document.querySelector("#clearBtn").onclick = clearForm;
+
+// ================= LOAD FABRICS =================
+async function load() {
   const r = await fetch(`${API}?fn=list`);
   const j = await r.json();
   renderTable(j.data || []);
 }
 
-function renderTable(list){
-  const q = document.querySelector('#searchAdm').value.toLowerCase();
+function renderTable(list) {
+  const q = $("#searchAdm").value.toLowerCase();
+
   list = list.filter(x =>
     x.name.toLowerCase().includes(q) ||
     x.category.toLowerCase().includes(q)
   );
 
-  document.querySelector('#table').innerHTML =
-    list.map(i => `
-      <div class='card' style='padding:12px'>
-        <div class='row space'>
-          <strong>${i.name}</strong>
-          <button class='btn-outline' onclick='editItem("${i.id}")'>Edit</button>
-        </div>
-        <div style='font-size:13px;color:var(--muted)'>${i.category}</div>
+  $("#table").innerHTML = list.map(i => `
+    <div class="card" style="padding:12px">
+      <div class="row" style="justify-content:space-between">
+        <strong>${i.name}</strong>
+        <button class="btn-outline" onclick="editItem('${i.id}')">Edit</button>
       </div>
-    `).join('');
+      <div style="font-size:13px;color:var(--muted)">${i.category}</div>
+    </div>
+  `).join("");
 }
 
-window.editItem = function(id){
+window.editItem = function(id) {
   editingId = id;
   fetch(`${API}?fn=list`).then(r => r.json()).then(j => {
-    const it = (j.data || []).find(x => x.id == id);
-
-    document.querySelector('#name').value = it.name;
-    document.querySelector('#category').value = it.category;
-    document.querySelector('#gsm').value = it.gsm;
-    document.querySelector('#description').value = it.description;
-
-    chars = it.characteristics || [];
-    apps = it.applications || [];
-    media = it.media || [];
-
-    renderTags();
+    const d = j.data.find(x => x.id == id);
+    $("#name").value = d.name;
+    $("#category").value = d.category;
+    $("#gsm").value = d.gsm;
+    $("#description").value = d.description;
+    chars = d.characteristics;
+    apps = d.applications;
+    media = d.media;
+    render();
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 };
 
-document.querySelector('#searchAdm').oninput = load;
+$("#searchAdm").oninput = load;
 load();
 </script>
 
