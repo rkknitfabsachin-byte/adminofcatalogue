@@ -102,10 +102,14 @@ let editingId = null;
 
 const $ = q => document.querySelector(q);
 
-// Add characteristic\$('#addChar').onclick = () => {
-  const v = \$('#charInput').value.trim();
-  if(v && !chars.includes(v)){ chars.push(v); renderTags(); }
-  \$('#charInput').value = "";
+// Add characteristic
+document.querySelector('#addChar').onclick = () => {
+  const v = document.querySelector('#charInput').value.trim();
+  if (v && !chars.includes(v)) {
+    chars.push(v);
+    renderTags();
+  }
+  document.querySelector('#charInput').value = "";
 };
 
 // Add application\$('#addApp').onclick = () => {
