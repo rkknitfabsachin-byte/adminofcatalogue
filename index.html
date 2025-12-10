@@ -112,48 +112,64 @@ document.querySelector('#addChar').onclick = () => {
   document.querySelector('#charInput').value = "";
 };
 
-// Add application\$('#addApp').onclick = () => {
-  const v = \$('#appInput').value.trim();
-  if(v && !apps.includes(v)){ apps.push(v); renderTags(); }
-  \$('#appInput').value = "";
+// Add application
+document.querySelector('#addApp').onclick = () => {
+  const v = document.querySelector('#appInput').value.trim();
+  if (v && !apps.includes(v)) {
+    apps.push(v);
+    renderTags();
+  }
+  document.querySelector('#appInput').value = "";
 };
 
 function renderTags(){
-  \$('#chars').innerHTML = chars.map(c => `<span class='pill'>${c}</span>`).join('');
-  \$('#apps').innerHTML = apps.map(a => `<span class='pill'>${a}</span>`).join('');
-  \$('#mediaPreview').innerHTML = media.map(m => `<img src='${m}' style='width:100px;height:80px;object-fit:cover;border-radius:8px'/>`).join('');
+  document.querySelector('#chars').innerHTML =
+    chars.map(c => `<span class='pill'>${c}</span>`).join('');
+
+  document.querySelector('#apps').innerHTML =
+    apps.map(a => `<span class='pill'>${a}</span>`).join('');
+
+  document.querySelector('#mediaPreview').innerHTML =
+    media.map(m => `<img src='${m}' style='width:100px;height:80px;object-fit:cover;border-radius:8px'/>`).join('');
 }
 
 // Upload files
-\$('#files').onchange = async () => {
-  if(!\$('#files').files.length) return;
-  \$('#uploadStatus').textContent = "Uploading…";
+document.querySelector('#files').onchange = async () => {
+  const f = document.querySelector('#files').files;
+  if (!f.length) return;
+
+  document.querySelector('#uploadStatus').textContent = "Uploading…";
+
   const fd = new FormData();
-  [...\$('#files').files].forEach(f => fd.append("file", f));
+  [...f].forEach(file => fd.append("file", file));
+
   const r = await fetch(`${API}?fn=upload`, { method:"POST", body:fd });
   const j = await r.json();
-  if(j.urls) media = media.concat(j.urls);
+
+  if (j.urls) media = [...media, ...j.urls];
   renderTags();
-  \$('#uploadStatus').textContent = "";
+
+  document.querySelector('#uploadStatus').textContent = "";
 };
 
 // Save fabric
-\$('#saveBtn').onclick = async () => {
+document.querySelector('#saveBtn').onclick = async () => {
+
   const payload = {
     id: editingId,
-    name: \$('#name').value.trim(),
-    category: \$('#category').value.trim(),
-    gsm: \$('#gsm').value.trim(),
-    description: \$('#description').value.trim(),
+    name: document.querySelector('#name').value.trim(),
+    category: document.querySelector('#category').value.trim(),
+    gsm: document.querySelector('#gsm').value.trim(),
+    description: document.querySelector('#description').value.trim(),
     characteristics: chars,
     applications: apps,
     media: media
   };
 
-  await fetch(`${API}?fn=${editingId?"update":"create"}`,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify(payload)
+  await fetch(`${API}?fn=${editingId ? "update" : "create"}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
   });
 
   clearForm();
@@ -161,14 +177,16 @@ function renderTags(){
 };
 
 // Clear form
-\$('#clearBtn').onclick = clearForm;
+document.querySelector('#clearBtn').onclick = clearForm;
 function clearForm(){
   editingId=null;
-  \$('#name').value="";
-  \$('#category').value="";
-  \$('#gsm').value="";
-  \$('#description').value="";
-  chars=[]; apps=[]; media=[];
+  document.querySelector('#name').value = "";
+  document.querySelector('#category').value = "";
+  document.querySelector('#gsm').value = "";
+  document.querySelector('#description').value = "";
+  chars = [];
+  apps = [];
+  media = [];
   renderTags();
 }
 
@@ -176,41 +194,48 @@ function clearForm(){
 async function load(){
   const r = await fetch(`${API}?fn=list`);
   const j = await r.json();
-  renderTable(j.data||[]);
+  renderTable(j.data || []);
 }
 
 function renderTable(list){
-  const q = \$('#searchAdm').value.toLowerCase();
-  list = list.filter(x => x.name.toLowerCase().includes(q) || x.category.toLowerCase().includes(q));
+  const q = document.querySelector('#searchAdm').value.toLowerCase();
+  list = list.filter(x =>
+    x.name.toLowerCase().includes(q) ||
+    x.category.toLowerCase().includes(q)
+  );
 
-  \$('#table').innerHTML = list.map(i => `
-    <div class='card' style='padding:12px'>
-      <div class='row space'>
-        <strong>${i.name}</strong>
-        <button class='btn-outline' onclick='editItem("${i.id}")'>Edit</button>
+  document.querySelector('#table').innerHTML =
+    list.map(i => `
+      <div class='card' style='padding:12px'>
+        <div class='row space'>
+          <strong>${i.name}</strong>
+          <button class='btn-outline' onclick='editItem("${i.id}")'>Edit</button>
+        </div>
+        <div style='font-size:13px;color:var(--muted)'>${i.category}</div>
       </div>
-      <div style='font-size:13px;color:var(--muted)'>${i.category}</div>
-    </div>
-  `).join('');
+    `).join('');
 }
 
 window.editItem = function(id){
   editingId = id;
-  fetch(`${API}?fn=list`).then(r=>r.json()).then(j=>{
-    const it = (j.data||[]).find(x=>x.id==id);
-    \$('#name').value=it.name;
-    \$('#category').value=it.category;
-    \$('#gsm').value=it.gsm;
-    \$('#description').value=it.description;
-    chars = it.characteristics||[];
-    apps = it.applications||[];
-    media = it.media||[];
+  fetch(`${API}?fn=list`).then(r => r.json()).then(j => {
+    const it = (j.data || []).find(x => x.id == id);
+
+    document.querySelector('#name').value = it.name;
+    document.querySelector('#category').value = it.category;
+    document.querySelector('#gsm').value = it.gsm;
+    document.querySelector('#description').value = it.description;
+
+    chars = it.characteristics || [];
+    apps = it.applications || [];
+    media = it.media || [];
+
     renderTags();
-    window.scrollTo({top:0,behavior:"smooth"});
+    window.scrollTo({ top: 0, behavior: "smooth" });
   });
 };
 
-\$('#searchAdm').oninput = load;
+document.querySelector('#searchAdm').oninput = load;
 load();
 </script>
 
